@@ -1,0 +1,47 @@
+#SFS筛选描述符
+
+import matplotlib.pyplot as plt
+from mlxtend.plotting import plot_sequential_feature_selection
+from mlxtend.feature_selection import SequentialFeatureSelector as SFS
+import pandas as pd
+import numpy as np
+from sklearn.ensemble import RandomForestRegressor
+import warnings
+       
+# 忽略 FutureWarning 类型的警告
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+# 生成示例数据
+dataset = pd.read_excel('CN-250-feature.xlsx')
+dataset = dataset.replace(np.nan, 0)
+X = dataset.iloc[:, 7:1172]
+Y = dataset.iloc[:, 5]
+# 设置并行作业的数量
+n_jobs = 8
+# 使用前向特征选择
+sfs1 = SFS(RandomForestRegressor(random_state=42),
+           k_features=25,
+           forward=True,
+           floating=False,
+           verbose=2,
+           scoring='r2',
+           cv=5,
+           n_jobs=n_jobs)
+
+try:
+    # 进行特征选择
+    sfs1 = sfs1.fit(np.array(X), Y)
+except ValueError as e:
+    print(f"Error: {e}")
+    print("可能无法找到足够数量的特征或模型无法收敛。")
+
+# 获取选中特征的列索引
+selected_feature_idx = sfs1.k_feature_idx_
+selected_features = X.columns[list(selected_feature_idx)]
+print(f"选中的特征：\n{selected_features}")
+
+fig = plot_sequential_feature_selection(sfs1.get_metric_dict())
+plt.ylabel('R^2')
+plt.xlabel('Number of Features')
+plt.title('Sequential Forward Selection (k=20)')
+plt.show()
