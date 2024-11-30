@@ -3,3 +3,5 @@ Predicting Fuel Properties of Cetane Number, Flash Point, Boiling Point and Melt
 
 
 #Installation of required libraries
+
+pip install -r requirements.txt
